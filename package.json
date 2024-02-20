@@ -1,0 +1,14 @@
+{
+  "name": "duplicati",
+  "version": "1.0.0",
+  "description": "Simple tool to ",
+  "main": "index.js",
+  "bin": {
+    "duplicati": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
