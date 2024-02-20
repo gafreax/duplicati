@@ -1,6 +1,6 @@
 {
   "name": "duplicati",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Simple tool to ",
   "main": "index.js",
   "bin": {
@@ -9,6 +9,6 @@
   "scripts": {
     "start": "node src/index.js"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Gabriele Fontana <gafreax@gmail.com>",
+  "license": "MIT"
 }
