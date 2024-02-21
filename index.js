@@ -1,6 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+#!/usr/bin/env node
+import chalk from 'chalk'
+import crypto from 'crypto'
+import fs from 'fs'
+import ora from 'ora'
+import path from 'path'
+import process from 'node:process'
+import { program } from 'commander'
 
 const FILES_TO_SKIP = [
   '.git',
@@ -17,53 +22,77 @@ const FILES_TO_SKIP = [
   '.DS_Store',
   '.gitignore',
   '.idea',
-  '.npmignore',
-];
+  '.npmignore'
+]
 
-const FUNCTION_REGEX = /^(?!#)(function [a-zA-Z].*{)|(const [a-zA-Z]*.*=>).*$/gm;
+const FUNCTION_REGEX = /^(?!#)(function [a-zA-Z].*{)|(const [a-zA-Z]*.*=>).*$/gm
 
-function isValidDir(dir) {
-  const stat = fs.statSync(dir);
-  return stat.isDirectory();
+function isValidDir (dir) {
+  const stat = fs.statSync(dir)
+  return stat.isDirectory()
 }
 
-function hash(str) {
-  return crypto.createHash('md5').update(str).digest('hex');
+function hash (str) {
+  return crypto.createHash('md5').update(str).digest('hex')
 }
 
-function readAllFilesSync(dirPath) {
-  let functions = [];
-  const contents = fs.readdirSync(dirPath);
+function processFiles (dirPath, functions) {
+  const contents = fs.readdirSync(dirPath)
   for (const fileOrDir of contents) {
-    const file = path.join(dirPath, fileOrDir);
-    if (FILES_TO_SKIP.some(name => file.includes(name))) { continue; }
+    const file = path.join(dirPath, fileOrDir)
+    if (FILES_TO_SKIP.some(name => file.includes(name))) { continue }
     if (!isValidDir(file)) {
-      const fileContent = fs.readFileSync(file, 'utf8');
-      const match = fileContent.match(FUNCTION_REGEX) ?? [];
+      const fileContent = fs.readFileSync(file, 'utf8')
+      const match = fileContent.match(FUNCTION_REGEX) ?? []
       for (const firm of match) {
-        const key = hash(firm);
-        const existingFunction = functions.find(f => f.key === key);
-        if (existingFunction) {
-          existingFunction.usage++; // Increase usage count
-        } else {
-          functions.push({ firm, path: file, usage: 1});
-        }
+        if (firm.length === 0) { continue }
+        const key = hash(firm)
+        const { count } = functions.get(key) ?? { count: 1}
+        functions.set(key, { firm, file, count })
       }
     } else {
-      functions.push(readAllFilesSync(file)); // Recursive call
+      functions = processFiles(file, functions) // Recursive call
     }
   }
-
-  return functions;
+  return functions
 }
 
-const directoryPaths = process.argv.splice(2);
-let allFunctions = [];
+function duplicati (directoryPaths) {
+  const spinner = ora(`Searching for duplicates into ${directoryPaths}...`).start()
+  console.log()
+  let allFunctions = new Map()
+  for (const dir of directoryPaths) {
+    if (dir.match(/\w+/)) {
+      allFunctions = processFiles(dir, allFunctions)
+    }
+  }
+  
+  for ( const value of allFunctions ) {
+    const [ , obj] = value
+    const { firm, file, count } = obj
+    
+    if (firm.length > 1) {
+      const [, g1, g2] = firm.match(/function (\w+)\(|const (\w+).*=/)
+      const fname = g1 ?? g2
+      console.log( chalk.magenta(fname.padEnd(40)) + chalk.cyan(file.padEnd(40)) + chalk.blue(count) )
+    }
+  }
+  spinner.stop()
+}
 
-for (const dir of directoryPaths) {
-  if (dir.match(/[a-zA-Z\-_]*/)) {
-    allFunctions.push(...readAllFilesSync(dir));
+async function start () {
+  program
+    .name('duplicati')
+    .description('Simple tool to find duplicate functions')
+    .version(process.env.npm_package_version)
+  program
+    .argument('<dirs>', 'directory to check')
+  program.parse()
+  if (program.args[0]) {
+    duplicati(process.argv.splice(2))
+  } else {
+    console.log(chalk.red('No directory provided'))
   }
 }
 
-console.log(allFunctions); // Print the combined array of subarrays
+start()
