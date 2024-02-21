@@ -1,14 +1,27 @@
 {
-  "name": "duplicati",
-  "version": "0.0.1",
-  "description": "Simple tool to ",
+  "name": "@gafreax/duplicati",
+  "version": "0.0.4",
+  "description": "Simple tool to find duplicate functions",
   "main": "index.js",
+  "type": "module",
+  "keywords": [
+    "duplicate",
+    "functions",
+    "tool",
+    "code",
+    "static-code"
+  ],
   "bin": {
-    "duplicati": "src/index.js"
+    "duplicati": "index.js"
   },
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node index.js"
   },
   "author": "Gabriele Fontana <gafreax@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "ora": "^8.0.1"
+  }
 }
