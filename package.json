@@ -1,6 +1,6 @@
 {
-  "name": "duplicati",
-  "version": "0.0.6",
+  "name": "@gafreax/duplicati",
+  "version": "0.0.7",
   "description": "Simple tool to find duplicate functions",
   "main": "./index.js",
   "type": "module",
@@ -12,7 +12,7 @@
     "static-code"
   ],
   "bin": {
-    "duplicati": "./index.js"
+    "@gafreax/duplicati": "./index.js"
   },
   "scripts": {
     "start": "node index.js"
